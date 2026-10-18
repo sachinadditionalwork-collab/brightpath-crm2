@@ -104,7 +104,7 @@ $$\text{Develop} \longrightarrow \text{Test Locally} \longrightarrow \text{Verif
 
 ---
 
-### [ ] Phase 1: Security Baseline, Tooling & Application Shell
+### [x] Phase 1: Security Baseline, Tooling & Application Shell (Completed)
 * **Features to Implement:**
   * Update `.gitignore` to ignore `.env`, `.env*.local`, `dist`.
   * Install dependencies: `@supabase/supabase-js`, `react-router-dom`, `lucide-react`.
