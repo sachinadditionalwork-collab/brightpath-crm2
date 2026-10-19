@@ -1,6 +1,13 @@
 import { User, Database, Info } from 'lucide-react'
+import { useAuth } from '../../hooks/useAuth'
 
 export default function SettingsView() {
+  const { profile, user } = useAuth()
+
+  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Staff Member'
+  const email = user?.email || profile?.email || 'counsellor@brightpath.edu'
+  const role = profile?.role || 'counsellor'
+
   return (
     <div className="animate-slide-up">
       {/* Page Header */}
@@ -19,9 +26,11 @@ export default function SettingsView() {
           <div className="card-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <User size={18} color="#2563eb" />
-              <span style={{ fontWeight: 600 }}>Active Counselor Profile</span>
+              <span style={{ fontWeight: 600 }}>Active Profile</span>
             </div>
-            <span className="status-badge badge-qualified">Counsellor</span>
+            <span className={`status-badge ${role === 'admin' ? 'badge-converted' : role === 'manager' ? 'badge-contacted' : 'badge-qualified'}`}>
+              {role.toUpperCase()}
+            </span>
           </div>
           <div className="card-body">
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -30,7 +39,7 @@ export default function SettingsView() {
                   Full Name
                 </label>
                 <div style={{ fontWeight: 600, color: '#0f172a', marginTop: '0.25rem' }}>
-                  Anjali Gupta
+                  {displayName}
                 </div>
               </div>
 
@@ -39,7 +48,7 @@ export default function SettingsView() {
                   Email Address
                 </label>
                 <div style={{ fontWeight: 500, color: '#334155', marginTop: '0.25rem' }}>
-                  anjali.gupta@brightpath.edu
+                  {email}
                 </div>
               </div>
 

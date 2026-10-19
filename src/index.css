@@ -197,6 +197,10 @@ input, select, textarea {
   animation: slideUp 350ms var(--ease-spring) forwards;
 }
 
+.animate-error-shake {
+  animation: errorShake 400ms ease-in-out;
+}
+
 /* ==========================================================================
    Application Shell Layout
    ========================================================================== */

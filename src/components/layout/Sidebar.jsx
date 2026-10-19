@@ -6,9 +6,13 @@ import {
   Settings,
   GraduationCap,
   Sparkles,
+  LogOut,
 } from 'lucide-react'
+import { useAuth } from '../../hooks/useAuth'
 
 export default function Sidebar() {
+  const { profile, user, signOut } = useAuth()
+
   const navItems = [
     {
       to: '/',
@@ -35,6 +39,15 @@ export default function Sidebar() {
       badge: null,
     },
   ]
+
+  // Compute initials
+  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Staff Member'
+  const initials = displayName
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .substring(0, 2)
+    .toUpperCase()
 
   return (
     <aside className="desktop-sidebar">
@@ -97,18 +110,31 @@ export default function Sidebar() {
       >
         <Sparkles size={16} color="#60a5fa" />
         <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
-          <div style={{ fontWeight: 600, color: '#f1f5f9' }}>Phase 1 Active</div>
-          <div style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>Layout Shell Ready</div>
+          <div style={{ fontWeight: 600, color: '#f1f5f9' }}>Phase 3 Active</div>
+          <div style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>Auth & Roles Online</div>
         </div>
       </div>
 
       {/* User Footer Profile */}
-      <div className="sidebar-footer">
-        <div className="user-avatar-pill">BP</div>
-        <div className="user-meta">
-          <span className="user-name">Staff Member</span>
-          <span className="user-role-tag">Counsellor</span>
+      <div className="sidebar-footer" style={{ justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', overflow: 'hidden' }}>
+          <div className="user-avatar-pill">{initials}</div>
+          <div className="user-meta">
+            <span className="user-name">{displayName}</span>
+            <span className="user-role-tag">{profile?.role || 'Counsellor'}</span>
+          </div>
         </div>
+
+        <button
+          type="button"
+          onClick={signOut}
+          className="btn btn-ghost"
+          style={{ padding: '0.4rem', color: '#94a3b8', borderRadius: '6px' }}
+          title="Sign Out"
+          aria-label="Sign Out"
+        >
+          <LogOut size={16} />
+        </button>
       </div>
     </aside>
   )
