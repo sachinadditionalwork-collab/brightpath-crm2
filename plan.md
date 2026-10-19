@@ -209,7 +209,7 @@ $$\text{Develop} \longrightarrow \text{Test Locally} \longrightarrow \text{Verif
 
 ---
 
-### [ ] Phase 7: Lead Activity History & Timeline
+### [x] Phase 7: Lead Activity History & Timeline (Completed)
 * **Features to Implement:**
   * Implement `src/services/activityService.ts`.
   * Build `ActivityTimeline` component within `LeadDetailDrawer`:

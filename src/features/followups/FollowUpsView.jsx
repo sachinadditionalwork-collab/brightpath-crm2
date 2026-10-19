@@ -13,6 +13,7 @@ import {
   AlertCircle,
 } from 'lucide-react'
 import { useFollowUps } from '../../hooks/useFollowUps'
+import { useAuth } from '../../hooks/useAuth'
 import { leadService } from '../../services/leadService'
 import ScheduleFollowUpModal from './ScheduleFollowUpModal'
 import LeadDetailDrawer from '../leads/LeadDetailDrawer'
@@ -86,6 +87,7 @@ export default function FollowUpsView() {
     completeFollowUp,
     cancelFollowUp,
   } = useFollowUps()
+  const { user, profile } = useAuth()
 
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
   const [selectedLead, setSelectedLead] = useState(null)
@@ -134,7 +136,7 @@ export default function FollowUpsView() {
 
   // Handle lead detail drawer updates
   const handleUpdateLeadFromDrawer = async (leadId, updates) => {
-    const res = await leadService.updateLead(leadId, updates)
+    const res = await leadService.updateLead(leadId, updates, profile || user)
     if (res.success) {
       setSelectedLead((prev) => (prev && prev.id === leadId ? { ...prev, ...updates } : prev))
       showToast('Student lead profile updated.')

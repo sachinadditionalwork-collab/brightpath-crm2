@@ -17,8 +17,10 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { followUpService } from '../../services/followUpService'
+import { activityService } from '../../services/activityService'
 import LostReasonModal from './LostReasonModal'
 import ScheduleFollowUpModal from '../followups/ScheduleFollowUpModal'
+import ActivityTimeline from './ActivityTimeline'
 
 function formatDrawerDueTime(isoString) {
   if (!isoString) return ''
@@ -120,11 +122,13 @@ export default function LeadDetailDrawer({
     if (!newNoteText.trim()) return
 
     setIsUpdating(true)
+    const noteText = newNoteText.trim()
     const updatedNotes = lead.notes
-      ? `${lead.notes}\n\n[${new Date().toLocaleDateString('en-US')}]: ${newNoteText.trim()}`
-      : `[${new Date().toLocaleDateString('en-US')}]: ${newNoteText.trim()}`
+      ? `${lead.notes}\n\n[${new Date().toLocaleDateString('en-US')}]: ${noteText}`
+      : `[${new Date().toLocaleDateString('en-US')}]: ${noteText}`
 
     await onUpdateLead(lead.id, { notes: updatedNotes })
+    await activityService.addNote(lead.id, noteText, profile || user)
     setNewNoteText('')
     setIsUpdating(false)
   }
@@ -620,6 +624,9 @@ export default function LeadDetailDrawer({
               </div>
             </form>
           </div>
+
+          {/* Audit & Interaction Timeline */}
+          <ActivityTimeline leadId={lead.id} />
         </div>
 
         {/* Drawer Footer */}

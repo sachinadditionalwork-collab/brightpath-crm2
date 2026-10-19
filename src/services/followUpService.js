@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
+import { activityService } from './activityService'
 
 /**
  * Follow-up Service
@@ -174,6 +175,17 @@ export const followUpService = {
 
       items.unshift(newFollowUp)
       saveSandboxFollowUps(items)
+
+      activityService.logActivity(
+        {
+          leadId: payload.lead_id,
+          activityType: 'followup_scheduled',
+          description: `Follow-up scheduled for ${new Date(payload.due_at).toLocaleDateString()}: "${payload.note.trim()}".`,
+          metadata: { due_at: payload.due_at },
+        },
+        currentUser
+      )
+
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('brightpath:followups_changed'))
       }
@@ -202,12 +214,15 @@ export const followUpService = {
 
       // Auto-log activity in PostgreSQL
       if (data?.id) {
-        await supabase.from('activities').insert({
-          lead_id: payload.lead_id,
-          actor_id: creatorId,
-          activity_type: 'followup_scheduled',
-          description: `Follow-up scheduled for ${new Date(payload.due_at).toLocaleDateString()}: "${payload.note.trim()}".`,
-        })
+        await activityService.logActivity(
+          {
+            leadId: payload.lead_id,
+            activityType: 'followup_scheduled',
+            description: `Follow-up scheduled for ${new Date(payload.due_at).toLocaleDateString()}: "${payload.note.trim()}".`,
+            metadata: { due_at: payload.due_at },
+          },
+          currentUser
+        )
       }
 
       if (typeof window !== 'undefined') {
@@ -224,8 +239,6 @@ export const followUpService = {
    * Mark follow-up as completed and update activity log
    */
   async completeFollowUp(id, currentUser) {
-    const actorId = currentUser?.id || 'demo-counsellor-uuid'
-
     if (!isSupabaseConfigured || !supabase) {
       const items = getSandboxFollowUps()
       const index = items.findIndex((item) => item.id === id)
@@ -236,6 +249,17 @@ export const followUpService = {
           completed_at: new Date().toISOString(),
         }
         saveSandboxFollowUps(items)
+
+        activityService.logActivity(
+          {
+            leadId: items[index].lead_id,
+            activityType: 'followup_completed',
+            description: `Follow-up completed: "${items[index].note}".`,
+            metadata: { completed_at: items[index].completed_at },
+          },
+          currentUser
+        )
+
         if (typeof window !== 'undefined') {
           window.dispatchEvent(new CustomEvent('brightpath:followups_changed'))
         }
@@ -264,12 +288,15 @@ export const followUpService = {
 
       // Log activity
       if (data?.lead_id) {
-        await supabase.from('activities').insert({
-          lead_id: data.lead_id,
-          actor_id: actorId,
-          activity_type: 'followup_completed',
-          description: `Follow-up completed: "${data.note}".`,
-        })
+        await activityService.logActivity(
+          {
+            leadId: data.lead_id,
+            activityType: 'followup_completed',
+            description: `Follow-up completed: "${data.note}".`,
+            metadata: { completed_at: nowIso },
+          },
+          currentUser
+        )
       }
 
       if (typeof window !== 'undefined') {

@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient'
+import { activityService } from './activityService'
 
 /**
  * Lead Management Service
@@ -219,6 +220,17 @@ export const leadService = {
 
       leads.unshift(newLead)
       saveSandboxLeads(leads)
+
+      activityService.logActivity(
+        {
+          leadId: newLead.id,
+          activityType: 'lead_created',
+          description: `Inquiry registered by ${creatorName} via ${leadPayload.source}.`,
+          metadata: { source: leadPayload.source, course_interest: leadPayload.course_interest },
+        },
+        currentUser
+      )
+
       return { data: newLead, error: null }
     }
 
@@ -248,12 +260,15 @@ export const leadService = {
 
       // Automatically record activity in 'activities' audit log
       if (data?.id) {
-        await supabase.from('activities').insert({
-          lead_id: data.id,
-          actor_id: creatorId,
-          activity_type: 'lead_created',
-          description: `Inquiry registered by ${creatorName} via ${leadPayload.source}.`,
-        })
+        await activityService.logActivity(
+          {
+            leadId: data.id,
+            activityType: 'lead_created',
+            description: `Inquiry registered by ${creatorName} via ${leadPayload.source}.`,
+            metadata: { source: leadPayload.source, course_interest: leadPayload.course_interest },
+          },
+          currentUser
+        )
       }
 
       return { data, error: null }
@@ -270,12 +285,50 @@ export const leadService = {
       const leads = getSandboxLeads()
       const index = leads.findIndex((l) => l.id === leadId)
       if (index !== -1) {
+        const oldLead = leads[index]
         leads[index] = {
           ...leads[index],
           ...updates,
           updated_at: new Date().toISOString(),
         }
         saveSandboxLeads(leads)
+
+        // Log status change if status changed
+        if (updates.status && updates.status !== oldLead.status) {
+          activityService.logActivity(
+            {
+              leadId,
+              activityType: 'status_changed',
+              description:
+                updates.status === 'Lost'
+                  ? `Status marked as Lost. Reason: ${updates.lost_reason || 'Not specified'}.`
+                  : `Pipeline stage moved from '${oldLead.status}' to '${updates.status}'.`,
+              metadata: {
+                old_status: oldLead.status,
+                new_status: updates.status,
+                lost_reason: updates.lost_reason || null,
+              },
+            },
+            currentUser
+          )
+        }
+
+        // Log reassignment if assigned_to_profile changed
+        if (
+          updates.assigned_to_profile &&
+          updates.assigned_to_profile.full_name !== oldLead.assigned_to_profile?.full_name
+        ) {
+          activityService.logActivity(
+            {
+              leadId,
+              activityType: 'lead_reassigned',
+              description: `Lead reassigned to counselor ${updates.assigned_to_profile.full_name}.`,
+              metadata: { new_assignee: updates.assigned_to_profile.full_name },
+            },
+            currentUser
+          )
+        }
+
         return { data: leads[index], error: null }
       }
       return { data: null, error: 'Lead not found.' }
@@ -300,12 +353,31 @@ export const leadService = {
 
       // If status changed, log activity
       if (updates.status && currentUser) {
-        await supabase.from('activities').insert({
-          lead_id: leadId,
-          actor_id: currentUser.id,
-          activity_type: 'status_changed',
-          description: `Status changed to '${updates.status}'${updates.lost_reason ? ` (Reason: ${updates.lost_reason})` : ''}.`,
-        })
+        await activityService.logActivity(
+          {
+            leadId,
+            activityType: 'status_changed',
+            description:
+              updates.status === 'Lost'
+                ? `Status marked as Lost. Reason: ${updates.lost_reason || 'Not specified'}.`
+                : `Pipeline stage moved to '${updates.status}'.`,
+            metadata: { new_status: updates.status, lost_reason: updates.lost_reason || null },
+          },
+          currentUser
+        )
+      }
+
+      // If reassigned
+      if (updates.assigned_to && currentUser) {
+        await activityService.logActivity(
+          {
+            leadId,
+            activityType: 'lead_reassigned',
+            description: `Lead reassigned to new counselor.`,
+            metadata: { assigned_to: updates.assigned_to },
+          },
+          currentUser
+        )
       }
 
       return { data, error: null }
