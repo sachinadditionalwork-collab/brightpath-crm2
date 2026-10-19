@@ -154,7 +154,7 @@ $$\text{Develop} \longrightarrow \text{Test Locally} \longrightarrow \text{Verif
 
 ---
 
-### [ ] Phase 4: Lead Management — CRUD, Listing, Search & Filters
+### [x] Phase 4: Lead Management — CRUD, Listing, Search & Filters (Completed)
 * **Features to Implement:**
   * Implement `src/services/leadService.ts`.
   * Build Lead Management view (`/leads`):
