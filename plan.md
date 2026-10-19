@@ -190,7 +190,7 @@ $$\text{Develop} \longrightarrow \text{Test Locally} \longrightarrow \text{Verif
 
 ---
 
-### [ ] Phase 6: Follow-up Scheduling Engine & Overdue Tracking
+### [x] Phase 6: Follow-up Scheduling Engine & Overdue Tracking (Completed)
 * **Features to Implement:**
   * Implement `src/services/followUpService.ts`.
   * Build "Schedule Follow-up" modal (due date/time picker, note, assignee).

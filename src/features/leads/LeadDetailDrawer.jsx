@@ -10,9 +10,31 @@ import {
   AlertTriangle,
   RotateCcw,
   Sparkles,
+  CalendarCheck,
+  Clock,
+  Plus,
+  Check,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { followUpService } from '../../services/followUpService'
 import LostReasonModal from './LostReasonModal'
+import ScheduleFollowUpModal from '../followups/ScheduleFollowUpModal'
+
+function formatDrawerDueTime(isoString) {
+  if (!isoString) return ''
+  try {
+    const d = new Date(isoString)
+    return d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    })
+  } catch {
+    return isoString
+  }
+}
 
 export default function LeadDetailDrawer({
   lead,
@@ -20,10 +42,35 @@ export default function LeadDetailDrawer({
   onClose,
   onUpdateLead,
 }) {
-  const { isManager, isAdmin } = useAuth()
+  const { isManager, isAdmin, user, profile } = useAuth()
   const [isLostModalOpen, setIsLostModalOpen] = useState(false)
+  const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false)
+  const [leadFollowUps, setLeadFollowUps] = useState([])
   const [newNoteText, setNewNoteText] = useState('')
   const [isUpdating, setIsUpdating] = useState(false)
+  const [completingFuId, setCompletingFuId] = useState(null)
+
+  // Load follow-ups for this lead
+  useEffect(() => {
+    if (!lead?.id || !isOpen) return
+    let isMounted = true
+
+    const loadFollowUps = () => {
+      followUpService.fetchFollowUps({ leadId: lead.id }).then((res) => {
+        if (isMounted && res.data) {
+          setLeadFollowUps(res.data)
+        }
+      })
+    }
+
+    loadFollowUps()
+    window.addEventListener('brightpath:followups_changed', loadFollowUps)
+
+    return () => {
+      isMounted = false
+      window.removeEventListener('brightpath:followups_changed', loadFollowUps)
+    }
+  }, [lead?.id, isOpen])
 
   // Close on Escape key
   useEffect(() => {
@@ -88,6 +135,24 @@ export default function LeadDetailDrawer({
       assigned_to_profile: { id: 'counsellor-reassigned', full_name: newAssigneeName },
     })
     setIsUpdating(false)
+  }
+
+  const handleScheduleLeadFollowUp = async (payload) => {
+    const res = await followUpService.createFollowUp(payload, profile || user)
+    if (!res.error) {
+      const r = await followUpService.fetchFollowUps({ leadId: lead.id })
+      if (r.data) setLeadFollowUps(r.data)
+      return { success: true }
+    }
+    return { success: false, error: res.error }
+  }
+
+  const handleCompleteLeadFollowUp = async (fuId) => {
+    setCompletingFuId(fuId)
+    await followUpService.completeFollowUp(fuId, profile || user)
+    const r = await followUpService.fetchFollowUps({ leadId: lead.id })
+    if (r.data) setLeadFollowUps(r.data)
+    setCompletingFuId(null)
   }
 
   return (
@@ -390,6 +455,117 @@ export default function LeadDetailDrawer({
             </div>
           </div>
 
+          {/* Scheduled Follow-ups Section */}
+          <div className="card" style={{ padding: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <CalendarCheck size={16} color="#2563eb" />
+                <div style={{ fontSize: '0.8125rem', fontWeight: 700, textTransform: 'uppercase', color: '#475569', letterSpacing: '0.05em' }}>
+                  Scheduled Follow-ups
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsFollowUpModalOpen(true)}
+                className="btn btn-secondary"
+                style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}
+              >
+                <Plus size={13} />
+                <span>Schedule</span>
+              </button>
+            </div>
+
+            {leadFollowUps.length === 0 ? (
+              <div style={{ padding: '1rem', textAlign: 'center', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
+                <p style={{ fontSize: '0.8125rem', color: '#64748b', margin: 0 }}>
+                  No follow-ups scheduled for this student.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsFollowUpModalOpen(true)}
+                  className="btn btn-primary"
+                  style={{ fontSize: '0.75rem', padding: '0.3rem 0.7rem', marginTop: '0.5rem' }}
+                >
+                  <Plus size={13} />
+                  <span>Set Follow-up Due Date</span>
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                {leadFollowUps.map((fu) => {
+                  const isFuOverdue = fu.status === 'pending' && new Date(fu.due_at) < new Date()
+                  const isFuDone = fu.status === 'completed'
+
+                  return (
+                    <div
+                      key={fu.id}
+                      style={{
+                        padding: '0.75rem 0.85rem',
+                        borderRadius: '8px',
+                        backgroundColor: isFuDone ? '#f0fdf4' : isFuOverdue ? '#fff1f2' : '#f8fafc',
+                        border: isFuDone
+                          ? '1px solid #bbf7d0'
+                          : isFuOverdue
+                          ? '1px solid #fecdd3'
+                          : '1px solid #e2e8f0',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        justifyContent: 'space-between',
+                        gap: '0.75rem',
+                      }}
+                    >
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                          <Clock size={13} color={isFuOverdue ? '#e11d48' : '#64748b'} />
+                          <span
+                            style={{
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              color: isFuOverdue ? '#be123c' : '#0f172a',
+                            }}
+                          >
+                            {formatDrawerDueTime(fu.due_at)}
+                          </span>
+                          {isFuOverdue && (
+                            <span className="status-badge badge-lost" style={{ fontSize: '0.6875rem', padding: '1px 6px' }}>
+                              Overdue
+                            </span>
+                          )}
+                          {isFuDone && (
+                            <span className="status-badge badge-converted" style={{ fontSize: '0.6875rem', padding: '1px 6px' }}>
+                              Completed
+                            </span>
+                          )}
+                        </div>
+                        <p style={{ fontSize: '0.8125rem', color: '#334155', margin: 0, lineHeight: 1.4 }}>
+                          {fu.note}
+                        </p>
+                      </div>
+
+                      {fu.status === 'pending' && (
+                        <button
+                          type="button"
+                          onClick={() => handleCompleteLeadFollowUp(fu.id)}
+                          className="btn btn-primary"
+                          style={{
+                            fontSize: '0.75rem',
+                            padding: '0.3rem 0.6rem',
+                            backgroundColor: '#059669',
+                            flexShrink: 0,
+                          }}
+                          disabled={completingFuId === fu.id}
+                        >
+                          <Check size={13} />
+                          <span>Done</span>
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Consultation Notes Section */}
           <div className="card" style={{ padding: '1.25rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
@@ -466,6 +642,14 @@ export default function LeadDetailDrawer({
           </button>
         </div>
       </div>
+
+      {/* Schedule Follow-up Modal for Lead */}
+      <ScheduleFollowUpModal
+        isOpen={isFollowUpModalOpen}
+        onClose={() => setIsFollowUpModalOpen(false)}
+        onSchedule={handleScheduleLeadFollowUp}
+        defaultLead={lead}
+      />
 
       {/* Mandatory Lost Reason Modal */}
       <LostReasonModal

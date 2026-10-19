@@ -9,9 +9,11 @@ import {
   LogOut,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { useFollowUps } from '../../hooks/useFollowUps'
 
 export default function Sidebar() {
   const { profile, user, signOut } = useAuth()
+  const { counts } = useFollowUps()
 
   const navItems = [
     {
@@ -30,7 +32,10 @@ export default function Sidebar() {
       to: '/followups',
       label: 'Follow-ups',
       icon: CalendarCheck,
-      badge: { text: '2', urgent: true },
+      badge:
+        counts.overdue > 0
+          ? { text: String(counts.overdue), urgent: true }
+          : null,
     },
     {
       to: '/settings',
@@ -110,8 +115,8 @@ export default function Sidebar() {
       >
         <Sparkles size={16} color="#60a5fa" />
         <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
-          <div style={{ fontWeight: 600, color: '#f1f5f9' }}>Phase 3 Active</div>
-          <div style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>Auth & Roles Online</div>
+          <div style={{ fontWeight: 600, color: '#f1f5f9' }}>Phase 6 Active</div>
+          <div style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>Follow-up Engine Online</div>
         </div>
       </div>
 
