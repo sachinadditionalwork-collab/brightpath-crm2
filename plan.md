@@ -122,7 +122,7 @@ $$\text{Develop} \longrightarrow \text{Test Locally} \longrightarrow \text{Verif
 
 ---
 
-### [ ] Phase 2: Supabase Client, Environment Validation & DB Schema
+### [x] Phase 2: Supabase Client, Environment Validation & DB Schema (Completed)
 * **Features to Implement:**
   * Create `src/lib/supabaseClient.ts` with runtime environment validation.
   * Create friendly fallback view `SetupGuideView` shown if `.env` keys are missing.

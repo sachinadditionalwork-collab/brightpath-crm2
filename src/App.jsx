@@ -5,6 +5,7 @@ import LeadsView from './features/leads/LeadsView'
 import FollowUpsView from './features/followups/FollowUpsView'
 import SettingsView from './features/settings/SettingsView'
 import LoginView from './features/auth/LoginView'
+import SetupGuideView from './components/feedback/SetupGuideView'
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="leads" element={<LeadsView />} />
           <Route path="followups" element={<FollowUpsView />} />
           <Route path="settings" element={<SettingsView />} />
+          <Route path="setup" element={<SetupGuideView />} />
         </Route>
 
         {/* 404 Catch-All */}

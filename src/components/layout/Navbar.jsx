@@ -1,5 +1,6 @@
 import { useLocation, Link } from 'react-router-dom'
-import { Plus, Bell, ShieldCheck } from 'lucide-react'
+import { Plus, Bell, ShieldCheck, AlertCircle } from 'lucide-react'
+import { isSupabaseConfigured } from '../../lib/supabaseClient'
 
 export default function Navbar({ onOpenNewLead }) {
   const location = useLocation()
@@ -15,6 +16,8 @@ export default function Navbar({ onOpenNewLead }) {
         return 'Follow-up Center'
       case '/settings':
         return 'Settings & Roles'
+      case '/setup':
+        return 'Database Diagnostics'
       default:
         return 'Workspace'
     }
@@ -31,24 +34,51 @@ export default function Navbar({ onOpenNewLead }) {
 
       {/* Right Side Actions */}
       <div className="navbar-actions">
-        {/* System Status Pill */}
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.375rem',
-            padding: '0.25rem 0.625rem',
-            borderRadius: '9999px',
-            backgroundColor: '#ecfdf5',
-            color: '#047857',
-            border: '1px solid #a7f3d0',
-            fontSize: '0.75rem',
-            fontWeight: 600,
-          }}
-        >
-          <ShieldCheck size={13} />
-          <span>System Normal</span>
-        </div>
+        {/* Dynamic Database Status Pill */}
+        {isSupabaseConfigured ? (
+          <Link
+            to="/setup"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              padding: '0.25rem 0.625rem',
+              borderRadius: '9999px',
+              backgroundColor: '#ecfdf5',
+              color: '#047857',
+              border: '1px solid #a7f3d0',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              textDecoration: 'none',
+            }}
+            title="Supabase is configured. Click to view diagnostics."
+          >
+            <ShieldCheck size={13} />
+            <span>DB Connected</span>
+          </Link>
+        ) : (
+          <Link
+            to="/setup"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              padding: '0.25rem 0.625rem',
+              borderRadius: '9999px',
+              backgroundColor: '#fffbeb',
+              color: '#b45309',
+              border: '1px solid #fde68a',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              textDecoration: 'none',
+              animation: 'pulseGlow 2.5s infinite ease-in-out',
+            }}
+            title="Supabase credentials needed. Click to configure."
+          >
+            <AlertCircle size={13} />
+            <span>Setup DB</span>
+          </Link>
+        )}
 
         {/* Notifications Icon Button */}
         <button
