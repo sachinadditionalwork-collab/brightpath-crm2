@@ -4,23 +4,23 @@ const rawUrl = import.meta.env.VITE_SUPABASE_URL
 const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 // Strip /rest/v1 or trailing slashes if accidentally included in .env
-const cleanUrl = rawUrl
+export const supabaseUrl = rawUrl
   ? rawUrl.trim().replace(/\/rest\/v1\/?$/, '').replace(/\/+$/, '')
   : ''
-const cleanKey = rawKey ? rawKey.trim() : ''
+export const supabaseAnonKey = rawKey ? rawKey.trim() : ''
 
 // Helper to determine if credentials are validly configured
 export const isSupabaseConfigured = Boolean(
-  cleanUrl &&
-  cleanKey &&
-  cleanUrl.startsWith('https://') &&
-  !cleanUrl.includes('your-project-id') &&
-  !cleanKey.includes('your-anon-public-client-key')
+  supabaseUrl &&
+  supabaseAnonKey &&
+  supabaseUrl.startsWith('https://') &&
+  !supabaseUrl.includes('your-project-id') &&
+  !supabaseAnonKey.includes('your-anon-public-client-key')
 )
 
 // Safe Supabase client initialization
 export const supabase = isSupabaseConfigured
-  ? createClient(cleanUrl, cleanKey, {
+  ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
