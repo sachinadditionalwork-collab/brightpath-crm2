@@ -1,0 +1,479 @@
+import { useState, useEffect } from 'react'
+import {
+  X,
+  Phone,
+  Mail,
+  Share2,
+  FileText,
+  UserCheck,
+  CheckCircle2,
+  AlertTriangle,
+  RotateCcw,
+  Sparkles,
+} from 'lucide-react'
+import { useAuth } from '../../hooks/useAuth'
+import LostReasonModal from './LostReasonModal'
+
+export default function LeadDetailDrawer({
+  lead,
+  isOpen,
+  onClose,
+  onUpdateLead,
+}) {
+  const { isManager, isAdmin } = useAuth()
+  const [isLostModalOpen, setIsLostModalOpen] = useState(false)
+  const [newNoteText, setNewNoteText] = useState('')
+  const [isUpdating, setIsUpdating] = useState(false)
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) onClose()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
+  if (!isOpen || !lead) return null
+
+  const stages = [
+    { id: 'New', label: '1. New' },
+    { id: 'Contacted', label: '2. Contacted' },
+    { id: 'Qualified', label: '3. Qualified' },
+    { id: 'Converted', label: '4. Converted' },
+  ]
+
+  const currentStageIndex = stages.findIndex((s) => s.id === lead.status)
+
+  const handleStatusChange = async (targetStatus) => {
+    if (targetStatus === 'Lost') {
+      setIsLostModalOpen(true)
+      return
+    }
+
+    setIsUpdating(true)
+    await onUpdateLead(lead.id, {
+      status: targetStatus,
+      lost_reason: null, // Clear lost reason if progressing
+    })
+    setIsUpdating(false)
+  }
+
+  const handleConfirmLost = async (reason) => {
+    setIsUpdating(true)
+    await onUpdateLead(lead.id, {
+      status: 'Lost',
+      lost_reason: reason,
+    })
+    setIsUpdating(false)
+  }
+
+  const handleSaveNote = async (e) => {
+    e.preventDefault()
+    if (!newNoteText.trim()) return
+
+    setIsUpdating(true)
+    const updatedNotes = lead.notes
+      ? `${lead.notes}\n\n[${new Date().toLocaleDateString('en-US')}]: ${newNoteText.trim()}`
+      : `[${new Date().toLocaleDateString('en-US')}]: ${newNoteText.trim()}`
+
+    await onUpdateLead(lead.id, { notes: updatedNotes })
+    setNewNoteText('')
+    setIsUpdating(false)
+  }
+
+  const handleReassign = async (newAssigneeName) => {
+    setIsUpdating(true)
+    await onUpdateLead(lead.id, {
+      assigned_to_profile: { id: 'counsellor-reassigned', full_name: newAssigneeName },
+    })
+    setIsUpdating(false)
+  }
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(9, 13, 22, 0.6)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 90,
+        }}
+        onClick={onClose}
+      />
+
+      {/* Slide-over Drawer */}
+      <div
+        className="animate-slide-in-right"
+        style={{
+          position: 'fixed',
+          top: 0,
+          bottom: 0,
+          right: 0,
+          width: '100%',
+          maxWidth: '540px',
+          backgroundColor: '#ffffff',
+          boxShadow: 'var(--shadow-modal)',
+          zIndex: 95,
+          display: 'flex',
+          flexDirection: 'column',
+          borderLeft: '1px solid #cbd5e1',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Drawer Header */}
+        <div
+          style={{
+            padding: '1.25rem 1.5rem',
+            borderBottom: '1px solid #e2e8f0',
+            backgroundColor: '#090d16',
+            color: '#ffffff',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            gap: '1rem',
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#ffffff' }}>
+                {lead.full_name}
+              </h2>
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  padding: '2px 8px',
+                  borderRadius: '6px',
+                  backgroundColor: '#1e293b',
+                  color: '#60a5fa',
+                  border: '1px solid #334155',
+                  fontWeight: 600,
+                }}
+              >
+                {lead.course_interest}
+              </span>
+            </div>
+            <div style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>
+              Inquiry ID: <code>{lead.id.substring(0, 8)}</code> • Registered {new Date(lead.created_at).toLocaleDateString()}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn btn-ghost"
+            style={{ color: '#94a3b8', padding: '0.4rem' }}
+            aria-label="Close drawer"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Drawer Scrollable Content */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          {/* Status Progression Stepper */}
+          <div className="card" style={{ padding: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <div style={{ fontSize: '0.8125rem', fontWeight: 700, textTransform: 'uppercase', color: '#475569', letterSpacing: '0.05em' }}>
+                Pipeline Stage Progression
+              </div>
+              {lead.status === 'Lost' ? (
+                <span className="status-badge badge-lost">
+                  <AlertTriangle size={12} />
+                  <span>Inquiry Lost</span>
+                </span>
+              ) : (
+                <span className={`status-badge badge-${lead.status.toLowerCase()}`}>
+                  <span>Current: {lead.status}</span>
+                </span>
+              )}
+            </div>
+
+            {/* Stepper Steps */}
+            {lead.status !== 'Lost' ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.35rem', marginBottom: '1rem' }}>
+                {stages.map((stg, idx) => {
+                  const isCurrent = lead.status === stg.id
+                  const isPassed = currentStageIndex > idx
+
+                  return (
+                    <button
+                      key={stg.id}
+                      type="button"
+                      disabled={isUpdating}
+                      onClick={() => handleStatusChange(stg.id)}
+                      style={{
+                        padding: '0.5rem 0.25rem',
+                        borderRadius: '6px',
+                        fontSize: '0.75rem',
+                        fontWeight: 600,
+                        textAlign: 'center',
+                        transition: 'all 150ms ease',
+                        backgroundColor: isCurrent
+                          ? '#2563eb'
+                          : isPassed
+                          ? '#ecfdf5'
+                          : '#f1f5f9',
+                        color: isCurrent
+                          ? '#ffffff'
+                          : isPassed
+                          ? '#047857'
+                          : '#64748b',
+                        border: isCurrent
+                          ? '1px solid #1d4ed8'
+                          : isPassed
+                          ? '1px solid #a7f3d0'
+                          : '1px solid #e2e8f0',
+                      }}
+                    >
+                      {stg.label}
+                    </button>
+                  )
+                })}
+              </div>
+            ) : (
+              /* If Lost: Banner with Reason */
+              <div
+                style={{
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  backgroundColor: '#fff1f2',
+                  border: '1px solid #fecdd3',
+                  color: '#9f1239',
+                  marginBottom: '1rem',
+                }}
+              >
+                <div style={{ fontWeight: 700, fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                  <AlertTriangle size={15} />
+                  <span>Marked as Lost</span>
+                </div>
+                <div style={{ fontSize: '0.8125rem', marginTop: '0.35rem', color: '#be123c' }}>
+                  <strong>Reason:</strong> {lead.lost_reason || 'No specific reason recorded.'}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleStatusChange('Contacted')}
+                  className="btn btn-secondary"
+                  style={{
+                    marginTop: '0.75rem',
+                    fontSize: '0.75rem',
+                    padding: '0.35rem 0.65rem',
+                    backgroundColor: '#ffffff',
+                  }}
+                >
+                  <RotateCcw size={13} />
+                  <span>Reopen Inquiry</span>
+                </button>
+              </div>
+            )}
+
+            {/* Stage Quick Advance Action Buttons */}
+            {lead.status !== 'Lost' && (
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {lead.status === 'New' && (
+                  <button
+                    type="button"
+                    onClick={() => handleStatusChange('Contacted')}
+                    className="btn btn-primary"
+                    style={{ flex: 1, fontSize: '0.8125rem' }}
+                    disabled={isUpdating}
+                  >
+                    <span>Mark Contacted</span>
+                  </button>
+                )}
+                {lead.status === 'Contacted' && (
+                  <button
+                    type="button"
+                    onClick={() => handleStatusChange('Qualified')}
+                    className="btn btn-primary"
+                    style={{ flex: 1, fontSize: '0.8125rem', backgroundColor: '#d97706' }}
+                    disabled={isUpdating}
+                  >
+                    <span>Qualify Candidate</span>
+                  </button>
+                )}
+                {lead.status === 'Qualified' && (
+                  <button
+                    type="button"
+                    onClick={() => handleStatusChange('Converted')}
+                    className="btn btn-primary"
+                    style={{ flex: 1, fontSize: '0.8125rem', backgroundColor: '#059669' }}
+                    disabled={isUpdating}
+                  >
+                    <CheckCircle2 size={15} />
+                    <span>Confirm Admission Won</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsLostModalOpen(true)}
+                  className="btn btn-ghost"
+                  style={{ fontSize: '0.8125rem', color: '#be123c' }}
+                  disabled={isUpdating}
+                >
+                  <span>Mark Lost...</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Student Profile & Contact Info */}
+          <div className="card" style={{ padding: '1.25rem' }}>
+            <div style={{ fontSize: '0.8125rem', fontWeight: 700, textTransform: 'uppercase', color: '#475569', letterSpacing: '0.05em', marginBottom: '1rem' }}>
+              Student Contact Information
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.8125rem', color: '#64748b' }}>Phone Number:</span>
+                <a
+                  href={`tel:${lead.phone}`}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#2563eb', fontWeight: 600, fontSize: '0.875rem' }}
+                >
+                  <Phone size={14} />
+                  <span>{lead.phone}</span>
+                </a>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.8125rem', color: '#64748b' }}>Email Address:</span>
+                {lead.email ? (
+                  <a
+                    href={`mailto:${lead.email}`}
+                    style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#2563eb', fontWeight: 600, fontSize: '0.875rem' }}
+                  >
+                    <Mail size={14} />
+                    <span>{lead.email}</span>
+                  </a>
+                ) : (
+                  <span style={{ fontSize: '0.8125rem', color: '#94a3b8' }}>Not provided</span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.8125rem', color: '#64748b' }}>Inquiry Source:</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#334155', fontWeight: 500, fontSize: '0.8125rem' }}>
+                  <Share2 size={13} color="#64748b" />
+                  <span>{lead.source}</span>
+                </span>
+              </div>
+
+              {/* Counselor Assignment */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.5rem', borderTop: '1px solid #f1f5f9' }}>
+                <span style={{ fontSize: '0.8125rem', color: '#64748b' }}>Assigned Counselor:</span>
+                {isManager || isAdmin ? (
+                  <select
+                    value={lead.assigned_to_profile?.full_name || 'Anjali Gupta'}
+                    onChange={(e) => handleReassign(e.target.value)}
+                    style={{
+                      padding: '0.3rem 0.5rem',
+                      borderRadius: '6px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '0.8125rem',
+                      fontWeight: 500,
+                      backgroundColor: '#ffffff',
+                    }}
+                  >
+                    <option value="Anjali Gupta">Anjali Gupta (Counsellor)</option>
+                    <option value="Vikram Singh">Vikram Singh (Manager)</option>
+                    <option value="Dr. Rajesh Sharma">Dr. Rajesh Sharma (Admin)</option>
+                  </select>
+                ) : (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#0f172a', fontWeight: 600, fontSize: '0.8125rem' }}>
+                    <UserCheck size={14} color="#059669" />
+                    <span>{lead.assigned_to_profile?.full_name || 'Staff Member'}</span>
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Consultation Notes Section */}
+          <div className="card" style={{ padding: '1.25rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+              <FileText size={16} color="#2563eb" />
+              <div style={{ fontSize: '0.8125rem', fontWeight: 700, textTransform: 'uppercase', color: '#475569', letterSpacing: '0.05em' }}>
+                Counseling Interaction Notes
+              </div>
+            </div>
+
+            <div
+              style={{
+                padding: '0.85rem',
+                borderRadius: '8px',
+                backgroundColor: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                fontSize: '0.8125rem',
+                color: '#334155',
+                whiteSpace: 'pre-wrap',
+                lineHeight: 1.6,
+                minHeight: '60px',
+                marginBottom: '1rem',
+              }}
+            >
+              {lead.notes || 'No consultation notes registered yet.'}
+            </div>
+
+            {/* Quick Add Note Form */}
+            <form onSubmit={handleSaveNote} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <input
+                type="text"
+                placeholder="Type a new update note and press Enter..."
+                value={newNoteText}
+                onChange={(e) => setNewNoteText(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: '6px',
+                  border: '1px solid #cbd5e1',
+                  fontSize: '0.8125rem',
+                  outline: 'none',
+                }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  type="submit"
+                  className="btn btn-secondary"
+                  disabled={!newNoteText.trim() || isUpdating}
+                  style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}
+                >
+                  <span>Append Note</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {/* Drawer Footer */}
+        <div
+          style={{
+            padding: '1rem 1.5rem',
+            borderTop: '1px solid #e2e8f0',
+            backgroundColor: '#f8fafc',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ fontSize: '0.75rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+            <Sparkles size={13} color="#2563eb" />
+            <span>Audit trail auto-logged to PostgreSQL activities</span>
+          </div>
+          <button type="button" onClick={onClose} className="btn btn-secondary" style={{ padding: '0.45rem 0.85rem' }}>
+            Close Drawer
+          </button>
+        </div>
+      </div>
+
+      {/* Mandatory Lost Reason Modal */}
+      <LostReasonModal
+        isOpen={isLostModalOpen}
+        onClose={() => setIsLostModalOpen(false)}
+        onConfirm={handleConfirmLost}
+        studentName={lead.full_name}
+      />
+    </>
+  )
+}

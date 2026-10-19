@@ -201,6 +201,19 @@ input, select, textarea {
   animation: errorShake 400ms ease-in-out;
 }
 
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 300ms var(--ease-spring) forwards;
+}
+
 /* ==========================================================================
    Application Shell Layout
    ========================================================================== */

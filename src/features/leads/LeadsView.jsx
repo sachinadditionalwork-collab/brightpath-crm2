@@ -14,6 +14,7 @@ import {
 import { useLeads } from '../../hooks/useLeads'
 import CreateLeadModal from './CreateLeadModal'
 import LeadFilters from './LeadFilters'
+import LeadDetailDrawer from './LeadDetailDrawer'
 
 // Deterministic timestamp formatter conforming to React 19 purity rules
 function formatTimestamp(isoDate) {
@@ -41,9 +42,11 @@ export default function LeadsView() {
     setFilter,
     resetFilters,
     createLead,
+    updateLead,
   } = useLeads()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedLead, setSelectedLead] = useState(null)
   const [successToast, setSuccessToast] = useState(null)
 
   const handleCreateLead = async (leadPayload) => {
@@ -51,6 +54,18 @@ export default function LeadsView() {
     if (result.success) {
       setSuccessToast(`Lead for ${leadPayload.full_name} created successfully!`)
       setTimeout(() => setSuccessToast(null), 3500)
+    }
+    return result
+  }
+
+  const handleUpdateLead = async (leadId, updates) => {
+    const result = await updateLead(leadId, updates)
+    if (result.success) {
+      setSelectedLead((prev) => (prev && prev.id === leadId ? { ...prev, ...updates } : prev))
+      if (updates.status) {
+        setSuccessToast(`Lead updated to stage: ${updates.status}`)
+        setTimeout(() => setSuccessToast(null), 3500)
+      }
     }
     return result
   }
@@ -260,9 +275,11 @@ export default function LeadsView() {
                   {leads.map((lead) => (
                     <tr
                       key={lead.id}
+                      onClick={() => setSelectedLead(lead)}
                       style={{
                         borderBottom: '1px solid #f1f5f9',
                         transition: 'background-color 150ms ease',
+                        cursor: 'pointer',
                       }}
                       onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8fafc')}
                       onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
@@ -419,6 +436,14 @@ export default function LeadsView() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreateLead={handleCreateLead}
+      />
+
+      {/* Slide-over Detail Drawer */}
+      <LeadDetailDrawer
+        lead={selectedLead}
+        isOpen={Boolean(selectedLead)}
+        onClose={() => setSelectedLead(null)}
+        onUpdateLead={handleUpdateLead}
       />
     </div>
   )

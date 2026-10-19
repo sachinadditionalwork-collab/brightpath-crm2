@@ -173,7 +173,7 @@ $$\text{Develop} \longrightarrow \text{Test Locally} \longrightarrow \text{Verif
 
 ---
 
-### [ ] Phase 5: Lead Detail Drawer, Status Progression & "Lost Reason" Validation
+### [x] Phase 5: Lead Detail Drawer, Status Progression & "Lost Reason" Validation (Completed)
 * **Features to Implement:**
   * Build `LeadDetailDrawer` slide-over view on lead row click.
   * Status Pipeline Stepper (`New` $\rightarrow$ `Contacted` $\rightarrow$ `Qualified` $\rightarrow$ `Converted` / `Lost`).
