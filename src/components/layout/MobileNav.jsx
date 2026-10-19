@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   Menu,
@@ -21,6 +21,15 @@ export default function MobileNav() {
   ]
 
   const closeDrawer = () => setIsOpen(false)
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) closeDrawer()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen])
 
   return (
     <>
@@ -59,7 +68,13 @@ export default function MobileNav() {
       {/* Backdrop Overlay & Slide-over Drawer */}
       {isOpen && (
         <div className="mobile-drawer-overlay" onClick={closeDrawer}>
-          <div className="mobile-drawer" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="mobile-drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile Navigation"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div
               style={{
                 height: '56px',

@@ -96,7 +96,10 @@ export default function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
       onClick={onClose}
     >
       <div
-        className={`card animate-slide-up ${shake ? 'animate-error-shake' : ''}`}
+        className={`card animate-slide-up modal-responsive ${shake ? 'animate-error-shake' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-lead-modal-title"
         style={{
           width: '100%',
           maxWidth: '680px',
@@ -135,7 +138,7 @@ export default function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
               <UserPlus size={18} />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a' }}>
+              <h2 id="create-lead-modal-title" style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a' }}>
                 Register New Student Lead
               </h2>
               <p style={{ fontSize: '0.75rem', color: '#64748b' }}>
@@ -180,10 +183,11 @@ export default function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.25rem' }}>
             {/* Student Full Name */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+              <label htmlFor="create-lead-fullname" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
                 Student Full Name <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
+                id="create-lead-fullname"
                 type="text"
                 placeholder="e.g. Rohan Mehra"
                 value={fullName}
@@ -202,7 +206,7 @@ export default function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
 
             {/* Phone Number */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+              <label htmlFor="create-lead-phone" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
                 Phone Number <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
@@ -211,6 +215,7 @@ export default function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
                   style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}
                 />
                 <input
+                  id="create-lead-phone"
                   type="tel"
                   placeholder="+91 98765 43210"
                   value={phone}
@@ -230,7 +235,7 @@ export default function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
 
             {/* Email Address */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+              <label htmlFor="create-lead-email" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
                 Email Address <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 400 }}>(Optional)</span>
               </label>
               <div style={{ position: 'relative' }}>
@@ -239,6 +244,7 @@ export default function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
                   style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}
                 />
                 <input
+                  id="create-lead-email"
                   type="email"
                   placeholder="student@example.com"
                   value={email}
@@ -257,7 +263,7 @@ export default function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
 
             {/* Course Interest */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+              <label htmlFor="create-lead-course" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
                 Course of Interest <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
@@ -266,6 +272,7 @@ export default function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
                   style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}
                 />
                 <select
+                  id="create-lead-course"
                   value={courseInterest}
                   onChange={(e) => setCourseInterest(e.target.value)}
                   style={{
@@ -290,7 +297,7 @@ export default function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
 
             {/* Lead Source */}
             <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+              <label htmlFor="create-lead-source" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
                 Inquiry Source <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <div style={{ position: 'relative' }}>
@@ -299,6 +306,7 @@ export default function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
                   style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}
                 />
                 <select
+                  id="create-lead-source"
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
                   style={{
@@ -324,7 +332,7 @@ export default function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
 
           {/* Initial Counseling Notes */}
           <div style={{ marginTop: '1.25rem' }}>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+            <label htmlFor="create-lead-notes" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
               Consultation Notes <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 400 }}>(Optional)</span>
             </label>
             <div style={{ position: 'relative' }}>
@@ -333,6 +341,7 @@ export default function CreateLeadModal({ isOpen, onClose, onCreateLead }) {
                 style={{ position: 'absolute', left: '0.75rem', top: '0.75rem', color: '#94a3b8' }}
               />
               <textarea
+                id="create-lead-notes"
                 rows={3}
                 placeholder="Key questions asked, preferred batch timing, scholarship inquiries..."
                 value={notes}

@@ -198,6 +198,9 @@ export default function FollowUpsView() {
           gap: '0.5rem',
           borderBottom: '1px solid #e2e8f0',
           marginBottom: '1.5rem',
+          overflowX: 'auto',
+          whiteSpace: 'nowrap',
+          paddingBottom: '2px',
         }}
       >
         {tabs.map((tab) => {
@@ -220,6 +223,7 @@ export default function FollowUpsView() {
                 transition: 'all 150ms ease',
                 marginBottom: '-1px',
                 cursor: 'pointer',
+                flexShrink: 0,
               }}
             >
               <span>{tab.label}</span>

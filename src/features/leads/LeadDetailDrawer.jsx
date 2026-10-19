@@ -175,7 +175,11 @@ export default function LeadDetailDrawer({
 
       {/* Slide-over Drawer */}
       <div
-        className="animate-slide-in-right"
+        className="animate-slide-in-right slide-over-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lead-detail-drawer-title"
+        aria-label={`Lead details for ${lead.full_name}`}
         style={{
           position: 'fixed',
           top: 0,
@@ -207,7 +211,7 @@ export default function LeadDetailDrawer({
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#ffffff' }}>
+              <h2 id="lead-detail-drawer-title" style={{ fontSize: '1.25rem', fontWeight: 700, color: '#ffffff' }}>
                 {lead.full_name}
               </h2>
               <span

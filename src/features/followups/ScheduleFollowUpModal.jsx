@@ -129,7 +129,10 @@ export default function ScheduleFollowUpModal({
       onClick={onClose}
     >
       <div
-        className={`card animate-slide-up ${shake ? 'animate-error-shake' : ''}`}
+        className={`card animate-slide-up modal-responsive ${shake ? 'animate-error-shake' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="schedule-followup-modal-title"
         style={{
           width: '100%',
           maxWidth: '560px',
@@ -166,7 +169,7 @@ export default function ScheduleFollowUpModal({
               <CalendarPlus size={18} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a' }}>
+              <h3 id="schedule-followup-modal-title" style={{ fontSize: '1.125rem', fontWeight: 700, color: '#0f172a' }}>
                 Schedule Counseling Follow-up
               </h3>
               <p style={{ fontSize: '0.75rem', color: '#64748b' }}>
@@ -210,11 +213,12 @@ export default function ScheduleFollowUpModal({
 
           {/* Student Lead Selector (if not pre-selected) */}
           <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+            <label htmlFor="schedule-lead-select" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
               Prospective Student <span style={{ color: '#ef4444' }}>*</span>
             </label>
             {defaultLead ? (
               <div
+                id="schedule-lead-select"
                 style={{
                   padding: '0.625rem 0.85rem',
                   borderRadius: '8px',
@@ -229,6 +233,7 @@ export default function ScheduleFollowUpModal({
               </div>
             ) : (
               <select
+                id="schedule-lead-select"
                 value={selectedLeadId}
                 onChange={(e) => setSelectedLeadId(e.target.value)}
                 required
@@ -255,7 +260,7 @@ export default function ScheduleFollowUpModal({
           {/* Due Date & Time Picker */}
           <div style={{ marginBottom: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.35rem' }}>
-              <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155' }}>
+              <label htmlFor="schedule-due-at" style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155' }}>
                 Follow-up Date & Time <span style={{ color: '#ef4444' }}>*</span>
               </label>
             </div>
@@ -266,6 +271,7 @@ export default function ScheduleFollowUpModal({
                 style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}
               />
               <input
+                id="schedule-due-at"
                 type="datetime-local"
                 value={dueAt}
                 onChange={(e) => setDueAt(e.target.value)}
@@ -323,7 +329,7 @@ export default function ScheduleFollowUpModal({
 
           {/* Agenda & Notes */}
           <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+            <label htmlFor="schedule-consultation-note" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
               Consultation Agenda & Notes <span style={{ color: '#ef4444' }}>*</span>
             </label>
             <div style={{ position: 'relative' }}>
@@ -332,6 +338,7 @@ export default function ScheduleFollowUpModal({
                 style={{ position: 'absolute', left: '0.75rem', top: '0.75rem', color: '#94a3b8' }}
               />
               <textarea
+                id="schedule-consultation-note"
                 rows={3}
                 placeholder="e.g. Call to discuss syllabus details, confirm preferred batch timing, and answer fee questions..."
                 value={note}

@@ -785,3 +785,62 @@ input, select, textarea {
     padding: 1.25rem 1rem;
   }
 }
+
+/* ==========================================================================
+   Phase 10: Mobile Drawer, Modal Responsiveness & Screen Optimization
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  /* Full-width slide-over drawer on mobile viewports */
+  .slide-over-drawer {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-left: none !important;
+  }
+
+  /* Responsive centered modals */
+  .modal-responsive {
+    width: calc(100vw - 1.5rem) !important;
+    max-width: calc(100vw - 1.5rem) !important;
+    margin: 0 auto !important;
+    max-height: 94vh !important;
+  }
+
+  /* Stack header controls vertically */
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.25rem;
+  }
+
+  /* Single-column KPI metrics cards */
+  .stat-card-grid {
+    grid-template-columns: 1fr;
+    gap: 0.875rem;
+  }
+}
+
+/* ==========================================================================
+   Phase 10: Accessibility (a11y) & Focus Indicators
+   ========================================================================== */
+
+:focus-visible {
+  outline: 2px solid var(--primary-600);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

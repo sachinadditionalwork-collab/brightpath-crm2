@@ -57,7 +57,10 @@ export default function LostReasonModal({ isOpen, onClose, onConfirm, studentNam
       onClick={onClose}
     >
       <div
-        className={`card animate-slide-up ${shake ? 'animate-error-shake' : ''}`}
+        className={`card animate-slide-up modal-responsive ${shake ? 'animate-error-shake' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="lost-reason-modal-title"
         style={{
           width: '100%',
           maxWidth: '520px',
@@ -95,7 +98,7 @@ export default function LostReasonModal({ isOpen, onClose, onConfirm, studentNam
               <AlertTriangle size={18} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#9f1239' }}>
+              <h3 id="lost-reason-modal-title" style={{ fontSize: '1.05rem', fontWeight: 700, color: '#9f1239' }}>
                 Reason for Lost Inquiry
               </h3>
               <p style={{ fontSize: '0.75rem', color: '#be123c' }}>
@@ -142,10 +145,11 @@ export default function LostReasonModal({ isOpen, onClose, onConfirm, studentNam
           </p>
 
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+            <label htmlFor="lost-reason-category" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
               Primary Reason Category <span style={{ color: '#ef4444' }}>*</span>
             </label>
             <select
+              id="lost-reason-category"
               value={reasonCategory}
               onChange={(e) => setReasonCategory(e.target.value)}
               style={{
@@ -169,10 +173,11 @@ export default function LostReasonModal({ isOpen, onClose, onConfirm, studentNam
           </div>
 
           <div style={{ marginBottom: '1.25rem' }}>
-            <label style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+            <label htmlFor="lost-reason-explanation" style={{ display: 'block', fontSize: '0.8125rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
               Additional Explanation / Context
             </label>
             <textarea
+              id="lost-reason-explanation"
               rows={3}
               placeholder="e.g. Student preferred offline weekend batches, but only online is currently available..."
               value={customExplanation}
