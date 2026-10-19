@@ -146,15 +146,22 @@ export const authService = {
    */
   async getSession() {
     if (!isSupabaseConfigured || !supabase) {
-      const stored = localStorage.getItem('brightpath_demo_user')
-      if (stored) {
+      let stored = localStorage.getItem('brightpath_demo_user')
+      if (!stored) {
+        const defaultAdmin = DEMO_USERS['admin@brightpath.edu']
+        localStorage.setItem('brightpath_demo_user', JSON.stringify(defaultAdmin))
+        stored = JSON.stringify(defaultAdmin)
+      }
+      try {
         const demoUser = JSON.parse(stored)
         return {
           session: { user: { id: demoUser.id, email: demoUser.email } },
           profile: demoUser,
         }
+      } catch {
+        localStorage.removeItem('brightpath_demo_user')
+        return { session: null, profile: null }
       }
-      return { session: null, profile: null }
     }
 
     const { data: { session }, error } = await supabase.auth.getSession()
