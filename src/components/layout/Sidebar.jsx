@@ -115,8 +115,8 @@ export default function Sidebar() {
       >
         <Sparkles size={16} color="#60a5fa" />
         <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>
-          <div style={{ fontWeight: 600, color: '#f1f5f9' }}>Phase 7 Active</div>
-          <div style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>Activity Timeline Online</div>
+          <div style={{ fontWeight: 600, color: '#f1f5f9' }}>Phase 8 Active</div>
+          <div style={{ fontSize: '0.6875rem', color: '#94a3b8' }}>Live Analytics Online</div>
         </div>
       </div>
 
