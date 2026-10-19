@@ -72,6 +72,14 @@ export function AuthProvider({ children }) {
     setProfile(null)
   }
 
+  const switchPersona = (email) => {
+    const demoUser = authService.switchDemoPersona(email)
+    if (demoUser) {
+      setUser({ id: demoUser.id, email: demoUser.email })
+      setProfile(demoUser)
+    }
+  }
+
   const value = {
     user,
     profile,
@@ -83,6 +91,7 @@ export function AuthProvider({ children }) {
     signIn,
     signUp,
     signOut,
+    switchPersona,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

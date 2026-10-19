@@ -22,12 +22,12 @@ export const dashboardService = {
   /**
    * Fetch all aggregated metrics with 1:1 reconciliation against leads and follow-ups
    */
-  async fetchDashboardMetrics() {
+  async fetchDashboardMetrics(currentUser = null) {
     try {
       // Fetch accessible leads and follow-ups in parallel
       const [leadsRes, followUpsRes] = await Promise.all([
-        leadService.fetchLeads({ pageSize: 500 }),
-        followUpService.fetchFollowUps(),
+        leadService.fetchLeads({ pageSize: 500 }, currentUser),
+        followUpService.fetchFollowUps({}, currentUser),
       ])
 
       const leads = leadsRes.data || []

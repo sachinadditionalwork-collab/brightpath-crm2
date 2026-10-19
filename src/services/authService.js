@@ -29,6 +29,31 @@ const DEMO_USERS = {
 
 export const authService = {
   /**
+   * Get list of preset demo accounts for testing RBAC
+   */
+  getDemoUsers() {
+    return Object.values(DEMO_USERS)
+  },
+
+  /**
+   * Switch active demo persona for RBAC evaluation
+   */
+  switchDemoPersona(email) {
+    const normalizedEmail = email.trim().toLowerCase()
+    const demoUser = DEMO_USERS[normalizedEmail]
+    if (demoUser) {
+      localStorage.setItem('brightpath_demo_user', JSON.stringify(demoUser))
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('brightpath:persona_changed', { detail: demoUser }))
+        window.dispatchEvent(new CustomEvent('brightpath:followups_changed'))
+        window.dispatchEvent(new CustomEvent('brightpath:activities_changed'))
+      }
+      return demoUser
+    }
+    return null
+  },
+
+  /**
    * Sign in with Email and Password
    */
   async signIn(email, password) {

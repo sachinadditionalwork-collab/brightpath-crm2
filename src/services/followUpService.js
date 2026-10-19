@@ -112,12 +112,21 @@ export const followUpService = {
   /**
    * Fetch all follow-ups with lead and assignee details
    */
-  async fetchFollowUps({ leadId = null } = {}) {
+  async fetchFollowUps({ leadId = null } = {}, currentUser = null) {
     if (!isSupabaseConfigured || !supabase) {
       let list = getSandboxFollowUps()
       if (leadId) {
         list = list.filter((item) => item.lead_id === leadId)
       }
+
+      // Enforce Counsellor RBAC in sandbox
+      if (currentUser?.role === 'counsellor') {
+        const userId = currentUser.id || 'demo-counsellor-uuid'
+        list = list.filter(
+          (item) => item.assigned_to === userId || item.created_by === userId
+        )
+      }
+
       // Sort by due_at ascending
       list.sort((a, b) => new Date(a.due_at) - new Date(b.due_at))
       return { data: list, error: null }

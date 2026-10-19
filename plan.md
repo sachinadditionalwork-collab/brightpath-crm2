@@ -244,7 +244,7 @@ $$\text{Develop} \longrightarrow \text{Test Locally} \longrightarrow \text{Verif
 
 ---
 
-### [ ] Phase 9: Role-Based Access Control (RBAC) & Security Audit
+### [x] Phase 9: Role-Based Access Control (RBAC) & Security Audit (Completed)
 * **Features to Implement:**
   * Test and enforce multi-role view boundaries:
     * Counsellor: Restricted to assigned and self-created leads.

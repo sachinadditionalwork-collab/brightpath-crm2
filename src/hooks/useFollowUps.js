@@ -23,7 +23,7 @@ export function useFollowUps(leadId = null) {
     let isMounted = true
 
     const loadData = () => {
-      followUpService.fetchFollowUps({ leadId })
+      followUpService.fetchFollowUps({ leadId }, profile || user)
         .then((result) => {
           if (isMounted) {
             if (result.error) {
@@ -49,12 +49,14 @@ export function useFollowUps(leadId = null) {
     }
 
     window.addEventListener('brightpath:followups_changed', handleExternalChange)
+    window.addEventListener('brightpath:persona_changed', handleExternalChange)
 
     return () => {
       isMounted = false
       window.removeEventListener('brightpath:followups_changed', handleExternalChange)
+      window.removeEventListener('brightpath:persona_changed', handleExternalChange)
     }
-  }, [leadId, refreshKey])
+  }, [leadId, refreshKey, profile, user])
 
   const refreshFollowUps = () => {
     setIsLoading(true)

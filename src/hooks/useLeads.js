@@ -31,33 +31,50 @@ export function useLeads() {
   useEffect(() => {
     let isMounted = true
 
-    leadService.fetchLeads({
-      search: debouncedSearch,
-      status: filters.status,
-      source: filters.source,
-      page: filters.page,
-      pageSize: filters.pageSize,
-    }).then((result) => {
-      if (isMounted) {
-        if (result.error) {
-          setError(result.error)
-        } else {
-          setLeads(result.data)
-          setTotalCount(result.count)
-        }
-        setIsLoading(false)
-      }
-    }).catch((err) => {
-      if (isMounted) {
-        setError(err.message || 'Error loading leads')
-        setIsLoading(false)
-      }
-    })
+    const loadLeads = () => {
+      leadService
+        .fetchLeads(
+          {
+            search: debouncedSearch,
+            status: filters.status,
+            source: filters.source,
+            page: filters.page,
+            pageSize: filters.pageSize,
+          },
+          profile || user
+        )
+        .then((result) => {
+          if (isMounted) {
+            if (result.error) {
+              setError(result.error)
+            } else {
+              setLeads(result.data)
+              setTotalCount(result.count)
+            }
+            setIsLoading(false)
+          }
+        })
+        .catch((err) => {
+          if (isMounted) {
+            setError(err.message || 'Error loading leads')
+            setIsLoading(false)
+          }
+        })
+    }
+
+    loadLeads()
+
+    const handlePersonaChange = () => {
+      loadLeads()
+    }
+
+    window.addEventListener('brightpath:persona_changed', handlePersonaChange)
 
     return () => {
       isMounted = false
+      window.removeEventListener('brightpath:persona_changed', handlePersonaChange)
     }
-  }, [debouncedSearch, filters.status, filters.source, filters.page, filters.pageSize, refreshKey])
+  }, [debouncedSearch, filters.status, filters.source, filters.page, filters.pageSize, refreshKey, profile, user])
 
   const setFilter = (key, value) => {
     setIsLoading(true)

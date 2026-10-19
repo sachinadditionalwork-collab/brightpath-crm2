@@ -1,15 +1,19 @@
 import { useState, useEffect, useCallback } from 'react'
 import { dashboardService } from '../services/dashboardService'
+import { useAuth } from './useAuth'
 
 export function useDashboard() {
+  const { user, profile } = useAuth()
   const [metrics, setMetrics] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  const currentUser = profile || user
+
   const loadMetrics = useCallback(() => {
     setIsLoading(true)
     dashboardService
-      .fetchDashboardMetrics()
+      .fetchDashboardMetrics(currentUser)
       .then((res) => {
         if (res.error) {
           setError(res.error)
@@ -22,13 +26,13 @@ export function useDashboard() {
         setError(err.message || 'Error loading dashboard metrics.')
         setIsLoading(false)
       })
-  }, [])
+  }, [currentUser])
 
   useEffect(() => {
     let isMounted = true
 
     dashboardService
-      .fetchDashboardMetrics()
+      .fetchDashboardMetrics(currentUser)
       .then((res) => {
         if (isMounted) {
           if (res.error) setError(res.error)
@@ -44,7 +48,7 @@ export function useDashboard() {
       })
 
     const handleDataChange = () => {
-      dashboardService.fetchDashboardMetrics().then((res) => {
+      dashboardService.fetchDashboardMetrics(currentUser).then((res) => {
         if (isMounted && res.data) {
           setMetrics(res.data)
         }
@@ -53,13 +57,15 @@ export function useDashboard() {
 
     window.addEventListener('brightpath:followups_changed', handleDataChange)
     window.addEventListener('brightpath:activities_changed', handleDataChange)
+    window.addEventListener('brightpath:persona_changed', handleDataChange)
 
     return () => {
       isMounted = false
       window.removeEventListener('brightpath:followups_changed', handleDataChange)
       window.removeEventListener('brightpath:activities_changed', handleDataChange)
+      window.removeEventListener('brightpath:persona_changed', handleDataChange)
     }
-  }, [])
+  }, [currentUser])
 
   return {
     metrics,

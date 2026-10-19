@@ -91,6 +91,22 @@ const INITIAL_DEMO_LEADS = [
     created_at: new Date(Date.now() - 120 * 3600 * 1000).toISOString(),
     updated_at: new Date(Date.now() - 72 * 3600 * 1000).toISOString(),
   },
+  {
+    id: 'lead-006',
+    full_name: 'Divya Kapoor',
+    email: 'divya.kapoor@example.com',
+    phone: '+91 97766 55443',
+    course_interest: 'Full Stack Development',
+    source: 'Website',
+    status: 'New',
+    assigned_to: 'demo-counsellor-other-uuid',
+    assigned_to_profile: { id: 'demo-counsellor-other-uuid', full_name: 'Pooja Verma' },
+    created_by: 'demo-manager-uuid',
+    created_by_profile: { id: 'demo-manager-uuid', full_name: 'Vikram Singh' },
+    notes: 'Inquiry registered by manager Vikram Singh. Assigned to counselor Pooja Verma.',
+    created_at: new Date(Date.now() - 14 * 3600 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 14 * 3600 * 1000).toISOString(),
+  },
 ]
 
 function getSandboxLeads() {
@@ -114,10 +130,18 @@ export const leadService = {
   /**
    * Fetch leads with debounced text search, multi-filters, and pagination
    */
-  async fetchLeads({ search = '', status = 'ALL', source = 'ALL', page = 1, pageSize = 8 } = {}) {
+  async fetchLeads({ search = '', status = 'ALL', source = 'ALL', page = 1, pageSize = 8 } = {}, currentUser = null) {
     if (!isSupabaseConfigured || !supabase) {
       // Sandbox mode filtering
       let list = getSandboxLeads()
+
+      // Enforce Counsellor RBAC: Counsellor sees only assigned or self-created leads
+      if (currentUser?.role === 'counsellor') {
+        const userId = currentUser.id || 'demo-counsellor-uuid'
+        list = list.filter(
+          (lead) => lead.assigned_to === userId || lead.created_by === userId
+        )
+      }
 
       if (search.trim()) {
         const q = search.trim().toLowerCase()
